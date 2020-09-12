@@ -2,17 +2,19 @@
 #
 # Table name: distributions
 #
-#  id                     :integer          not null, primary key
-#  agency_rep             :string
-#  comment                :text
-#  issued_at              :datetime
-#  reminder_email_enabled :boolean          default(FALSE), not null
-#  state                  :integer          default("started"), not null
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
-#  organization_id        :integer
-#  partner_id             :integer
-#  storage_location_id    :integer
+#  id                          :integer          not null, primary key
+#  agency_rep                  :string
+#  comment                     :text
+#  issued_at                   :datetime
+#  issued_at_end               :datetime
+#  issued_at_timeframe_enabled :boolean          default(FALSE)
+#  reminder_email_enabled      :boolean          default(FALSE), not null
+#  state                       :integer          default("started"), not null
+#  created_at                  :datetime         not null
+#  updated_at                  :datetime         not null
+#  organization_id             :integer
+#  partner_id                  :integer
+#  storage_location_id         :integer
 #
 
 RSpec.describe Distribution, type: :model do
@@ -40,6 +42,15 @@ RSpec.describe Distribution, type: :model do
       d = build(:distribution)
       item_missing = create(:item, name: "missing")
       d.line_items << build(:line_item, item: item_missing)
+      expect(d).not_to be_valid
+    end
+    it "ensures the issued at end time is after the issued at start time" do
+      d = build(:distribution)
+      start_time = Time.now
+      end_time = Time.now - 2.hours
+      d.issued_at = start_time
+      d.issued_at_end = end_time
+      d.issued_at_timeframe_enabled = true
       expect(d).not_to be_valid
     end
   end

@@ -3,17 +3,19 @@ require 'time_util'
 #
 # Table name: distributions
 #
-#  id                     :integer          not null, primary key
-#  agency_rep             :string
-#  comment                :text
-#  issued_at              :datetime
-#  reminder_email_enabled :boolean          default(FALSE), not null
-#  state                  :integer          default("started"), not null
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
-#  organization_id        :integer
-#  partner_id             :integer
-#  storage_location_id    :integer
+#  id                          :integer          not null, primary key
+#  agency_rep                  :string
+#  comment                     :text
+#  issued_at                   :datetime
+#  issued_at_end               :datetime
+#  issued_at_timeframe_enabled :boolean          default(FALSE)
+#  reminder_email_enabled      :boolean          default(FALSE), not null
+#  state                       :integer          default("started"), not null
+#  created_at                  :datetime         not null
+#  updated_at                  :datetime         not null
+#  organization_id             :integer
+#  partner_id                  :integer
+#  storage_location_id         :integer
 #
 
 class Distribution < ApplicationRecord
@@ -33,7 +35,7 @@ class Distribution < ApplicationRecord
 
   validates :storage_location, :partner, :organization, presence: true
   validate :line_item_items_exist_in_inventory
-
+  validate :issued_at_end_is_after_issued_at
   include IssuedAt
 
   before_save :combine_distribution
@@ -124,5 +126,15 @@ class Distribution < ApplicationRecord
 
   def past?
     issued_at < Time.zone.today
+  end
+
+  def issued_at_end_is_after_issued_at
+    if issued_at_timeframe_enabled
+      start_time = issued_at
+      end_time = issued_at_end
+      if start_time > end_time
+        errors.add(:issued_at_end, "can't be before issued at")
+      end
+    end
   end
 end
