@@ -142,6 +142,11 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :partner_groups do
+      resources :memberships, controller: :partner_group_memberships, only: %i(create destroy)
+      resources :items, controller: :partner_group_items, only: %i(create destroy)
+    end
+
     resources :diaper_drives
     resources :donations do
       # collection do
