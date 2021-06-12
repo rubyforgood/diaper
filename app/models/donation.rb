@@ -144,20 +144,36 @@ class Donation < ApplicationRecord
     storage_location.nil? ? "N/A" : storage_location.name
   end
 
+  CSV_EXPORT_TABLE = {
+    "Source" => ->(donation) {
+      donation.source_view
+    },
+    "Date" => ->(donation) {
+      donation.issued_at.strftime("%F")
+    },
+    "Donation Site" => ->(donation) {
+      donation.donation_site.try(:name)
+    },
+    "Storage Location" => ->(donation) {
+      donation.storage_location.name
+    },
+    "Quantity of Items" => ->(donation) {
+      donation.line_items.total
+    },
+    "Variety of Items" => ->(donation) {
+      donation.line_items.size
+    },
+    "Comments" => ->(donation) {
+      donation.comment
+    }
+  }
+
   def self.csv_export_headers
-    ["Source", "Date", "Donation Site", "Storage Location", "Quantity of Items", "Variety of Items", "Comments"]
+    self::CSV_EXPORT_TABLE.keys
   end
 
   def csv_export_attributes
-    [
-      source_view,
-      issued_at.strftime("%F"),
-      donation_site.try(:name),
-      storage_location.name,
-      line_items.total,
-      line_items.size,
-      comment
-    ]
+    self.class::CSV_EXPORT_TABLE.values.map { |lambd| lambd.call(self) }
   end
 
   private
