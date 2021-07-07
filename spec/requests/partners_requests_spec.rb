@@ -135,7 +135,7 @@ RSpec.describe "Partners", type: :request do
   end
 
   describe "GET #approve_partner" do
-    subject { -> { get approve_partner_partner_path(id: partner.id, organization_id: partner.organization_id) } }
+    subject { -> { get profile_path(id: partner.id, organization_id: partner.organization_id) } }
     let(:partner) { create(:partner) }
 
     it 'should contain the proper page header' do
