@@ -146,10 +146,13 @@ Rails.application.routes.draw do
       patch :restore, on: :member
     end
     resources :partners do
+      resources :profiles, only: %i(edit update)
       collection do
         post :import_csv
       end
       member do
+        get :profile
+        patch :profile
         get :approve_application
         get :approve_partner
         post :invite
